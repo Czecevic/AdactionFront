@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adaction - Tableau de bord</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Auth Container -->
+    <div id="auth-container" class="auth-container">
+      <div class="auth-forms">
+        <div id="login-form">
+          <h2><i class="fas fa-sign-in-alt"></i> Connexion</h2>
+          <form onsubmit="handleLogin(event)">
+            <input
+              type="text"
+              id="login-username"
+              placeholder="Nom d'utilisateur"
+              required
+            />
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Mot de passe"
+              required
+            />
+            <button type="submit">
+              <i class="fas fa-sign-in-alt"></i> Se connecter
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+      <header class="topnav">
+        <h1><i class="fas fa-hands-helping"></i> Adaction</h1>
+        <nav>
+          <button id="btn-volunteers" class="active" onclick="showVolunteers()">
+            <i class="fas fa-users"></i> Bénévoles
+          </button>
+          <button id="btn-collects" onclick="showCollects()">
+            <i class="fas fa-box"></i> Collectes
+          </button>
+        </nav>
+        <div class="user-info">
+          <p id="username"></p>
+          <button id="logout-button" onclick="handleLogout()">
+            <i class="fas fa-sign-out-alt"></i> Déconnexion
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <!-- Section Collectes -->
+        <div id="collects-section" class="data-section hidden">
+          <div class="section-header">
+            <h2><i class="fas fa-box"></i> Gestion des Déchets</h2>
+            <div id="collects-actions-btn">
+              <button class="btn btn-primary" onclick="openCollectModal()">
+                <i class="fas fa-plus"></i> Ajouter Collecte
+              </button>
+              <button class="btn btn-danger" onclick="deleteAllCollects()" style="margin-left: 10px;">
+                <i class="fas fa-trash"></i> Supprimer Tout
+              </button>
+            </div>
+          </div>
+          <div id="collects-list" class="data-grid"></div>
+        </div>
+        <!-- Section Bénévoles -->
+        <div id="volunteers-section" class="data-section">
+          <div class="section-header">
+            <h2><i class="fas fa-users"></i> Gestion des Bénévoles</h2>
+            <div>
+              <button class="btn btn-primary" onclick="openVolunteerModal()">
+                <i class="fas fa-plus"></i> Ajouter Bénévole
+              </button>
+              <!-- <button class="btn btn-danger" onclick="deleteAllVolunteers()" style="margin-left: 10px;">
+                <i class="fas fa-trash"></i> Supprimer Tout
+              </button> -->
+            </div>
+          </div>
+          <div id="volunteers-list" class="data-grid"></div>
+        </div>
+      </main>
+    </div>
+    <!-- Modal pour Collectes -->
+    <div id="collectModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="collect-modal-title">
+            <i class="fas fa-box"></i> Ajouter Collecte
+          </h3>
+          <button class="close" onclick="closeCollectModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="collectForm">
+            <input type="hidden" id="collect-id" />
+            
+            <div class="form-group">
+              <label for="collect-item">Article *</label>
+              <input type="text" id="collect-item" required placeholder="Ex: Vêtements, Nourriture..." />
+            </div>
+
+            <div class="form-group">
+              <label for="collect-quantity">Quantité *</label>
+              <input type="number" id="collect-quantity" required min="1" />
+            </div>
+
+            <div class="form-group">
+              <label for="collect-location">Lieu *</label>
+              <input type="text" id="collect-location" required placeholder="Ex: Paris, Lyon..." />
+            </div>
+
+            <div class="form-group">
+              <label for="collect-date">Date</label>
+              <input type="date" id="collect-date" />
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeCollectModal()">
+                Annuler
+              </button>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Sauvegarder
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Modal pour Bénévoles -->
+    <div id="volunteerModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="volunteer-modal-title">
+            <i class="fas fa-user-plus"></i> Ajouter Bénévole
+          </h3>
+          <button class="close" onclick="closeVolunteerModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="volunteerForm">
+            <input type="hidden" id="volunteer-id" />
+            
+            <div class="form-group">
+              <label for="volunteer-firstname">Prénom *</label>
+              <input type="text" id="volunteer-firstname" required />
+            </div>
+
+            <div class="form-group">
+              <label for="volunteer-lastname">Nom *</label>
+              <input type="text" id="volunteer-lastname" required />
+            </div>
+
+            <div class="form-group">
+              <label for="volunteer-username">Nom d'utilisateur *</label>
+              <input type="text" id="volunteer-username" required />
+            </div>
+
+            <div class="form-group">
+              <label for="volunteer-password">Mot de passe *</label>
+              <input type="password" id="volunteer-password" required />
+            </div>
+
+            <div class="form-group">
+              <label for="volunteer-location">Localisation</label>
+              <input type="text" id="volunteer-location" />
+            </div>
+
+            <div class="form-group">
+              <label for="volunteer-points">Points</label>
+              <input type="number" id="volunteer-points" min="0" value="0" />
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeVolunteerModal()">
+                Annuler
+              </button>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Sauvegarder
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <p>&copy; 2024 Adaction. Tous droits réservés.</p>
+    </footer>
+  </body>
+  <script type="module" src="script.js"></script>
+</html>
