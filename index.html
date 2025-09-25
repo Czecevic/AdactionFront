@@ -58,6 +58,22 @@
             <i class="fas fa-sign-out-alt"></i> Déconnexion
           </button>
         </div>
+        <div class="search-bar">
+          <label>Recherche :</label>
+          <input id="search-input" type="text" placeholder="Rechercher (nom, username, lieu)" />
+          <select id="filter-location"></select>
+          <select id="sort-by">
+            <option value="date">Date</option>
+            <option value="name">Nom</option>
+            <option value="location">Lieu</option>
+            <option value="points">Points</option>
+          </select>
+          <button id="sort-order" class="btn" title="Ordre">
+            <i class="fas fa-arrow-down-wide-short"></i>
+          </button>
+          <button id="apply-filters" class="btn btn-primary">Filtrer</button>
+          <button id="clear-filters" class="btn">Effacer</button>
+        </div>
       </header>
 
       <main>
