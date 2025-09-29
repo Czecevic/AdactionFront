@@ -1,6 +1,6 @@
-import { fetchWithAuth } from './api.js';
-import { showAlert, showLoading } from './ui.js';
-import { volunteers, currentUser } from './state.js';
+import { fetchWithAuth } from "./api.js";
+import { showAlert, showLoading } from "./ui.js";
+import { volunteers, currentUser } from "./state.js";
 
 /**
  * Check if the logged-in user has the "volunteer" role.
@@ -29,7 +29,8 @@ function parseDateInput(value) {
  * Handles different possible date property names.
  */
 function getVolunteerDate(volunteer) {
-  const dateValue = volunteer.createdAt || volunteer.date || volunteer.created_at;
+  const dateValue =
+    volunteer.createdAt || volunteer.date || volunteer.created_at;
   if (!dateValue) return null;
   const date = new Date(dateValue);
   return isNaN(date.getTime()) ? null : date;
@@ -40,16 +41,12 @@ function getVolunteerDate(volunteer) {
  * with unique volunteer locations.
  */
 function populateLocationFilter() {
-  const select = document.getElementById('filter-location');
+  const select = document.getElementById("filter-location");
   if (!select) return;
 
   // Extract unique, sorted locations
   const uniqueLocations = Array.from(
-    new Set(
-      volunteers
-        .map(v => (v.location || '').trim())
-        .filter(Boolean)
-    )
+    new Set(volunteers.map((v) => (v.location || "").trim()).filter(Boolean))
   ).sort((a, b) => a.localeCompare(b));
 
   const currentValue = select.value;
@@ -57,7 +54,9 @@ function populateLocationFilter() {
   // Reset dropdown and insert options
   select.innerHTML =
     '<option value="">All locations</option>' +
-    uniqueLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+    uniqueLocations
+      .map((loc) => `<option value="${loc}">${loc}</option>`)
+      .join("");
 
   // Preserve previous selection if still valid
   if (currentValue && uniqueLocations.includes(currentValue)) {
@@ -69,29 +68,29 @@ function populateLocationFilter() {
  * Sort volunteers based on current selected criteria.
  */
 function sortVolunteers(list) {
-  const sortByEl = document.getElementById('sort-by');
-  const sortOrderEl = document.getElementById('sort-order');
-  const sortBy = sortByEl?.value || 'date';
-  const order = sortOrderEl?.dataset?.order === 'asc' ? 'asc' : 'desc';
-  const multiplier = order === 'asc' ? 1 : -1;
+  const sortByEl = document.getElementById("sort-by");
+  const sortOrderEl = document.getElementById("sort-order");
+  const sortBy = sortByEl?.value || "date";
+  const order = sortOrderEl?.dataset?.order === "asc" ? "asc" : "desc";
+  const multiplier = order === "asc" ? 1 : -1;
 
   // Comparators
   const compareStrings = (a, b) =>
-    a.localeCompare(b, 'fr', { sensitivity: 'base' }) * multiplier;
+    a.localeCompare(b, "fr", { sensitivity: "base" }) * multiplier;
   const compareNumbers = (a, b) => ((a || 0) - (b || 0)) * multiplier;
 
   return [...list].sort((a, b) => {
     switch (sortBy) {
-      case 'location':
-        return compareStrings(a.location || '', b.location || '');
-      case 'name': {
-        const av = `${a.lastname || ''} ${a.firstname || ''}`.trim();
-        const bv = `${b.lastname || ''} ${b.firstname || ''}`.trim();
+      case "location":
+        return compareStrings(a.location || "", b.location || "");
+      case "name": {
+        const av = `${a.lastname || ""} ${a.firstname || ""}`.trim();
+        const bv = `${b.lastname || ""} ${b.firstname || ""}`.trim();
         return compareStrings(av, bv);
       }
-      case 'points':
+      case "points":
         return compareNumbers(Number(a.points || 0), Number(b.points || 0));
-      case 'date':
+      case "date":
       default: {
         const ad = getVolunteerDate(a);
         const bd = getVolunteerDate(b);
@@ -109,30 +108,40 @@ function sortVolunteers(list) {
  * and refresh the volunteer list.
  */
 function applyVolunteerFilters() {
-  const searchInput = document.getElementById('search-input');
-  const locationSelect = document.getElementById('filter-location');
-  const dateFromInput = document.getElementById('filter-date-from');
-  const dateToInput = document.getElementById('filter-date-to');
+  const searchInput = document.getElementById("search-input");
+  const locationSelect = document.getElementById("filter-location");
+  const dateFromInput = document.getElementById("filter-date-from");
+  const dateToInput = document.getElementById("filter-date-to");
 
-  const query = (searchInput?.value || '').trim().toLowerCase();
-  const selectedLocation = (locationSelect?.value || '').trim().toLowerCase();
-  const dateFrom = parseDateInput(dateFromInput?.value || '');
-  const dateToRaw = parseDateInput(dateToInput?.value || '');
+  const query = (searchInput?.value || "").trim().toLowerCase();
+  const selectedLocation = (locationSelect?.value || "").trim().toLowerCase();
+  const dateFrom = parseDateInput(dateFromInput?.value || "");
+  const dateToRaw = parseDateInput(dateToInput?.value || "");
   const dateTo = dateToRaw
-    ? new Date(dateToRaw.getFullYear(), dateToRaw.getMonth(), dateToRaw.getDate(), 23, 59, 59, 999)
+    ? new Date(
+        dateToRaw.getFullYear(),
+        dateToRaw.getMonth(),
+        dateToRaw.getDate(),
+        23,
+        59,
+        59,
+        999
+      )
     : null;
 
   // Apply filters
   const filtered = volunteers.filter((v) => {
     // Search by text
     if (query) {
-      const haystack = `${v.firstname || ''} ${v.lastname || ''} ${v.username || ''} ${v.location || ''}`.toLowerCase();
+      const haystack = `${v.firstname || ""} ${v.lastname || ""} ${
+        v.username || ""
+      } ${v.location || ""}`.toLowerCase();
       if (!haystack.includes(query)) return false;
     }
 
     // Filter by location
     if (selectedLocation) {
-      const loc = (v.location || '').toLowerCase();
+      const loc = (v.location || "").toLowerCase();
       if (loc !== selectedLocation) return false;
     }
 
@@ -160,9 +169,9 @@ function applyVolunteerFilters() {
  */
 const loadVolunteers = async () => {
   showLoading(true);
-
   try {
     const response = await fetchWithAuth(`/volunteers`);
+    console.log(response);
 
     if (response.ok) {
       const data = await response.json();
@@ -176,9 +185,33 @@ const loadVolunteers = async () => {
 
     volunteers.length = 0;
     volunteers.push(
-      { id: 1, firstname: "Marie", lastname: "Dubois", username: "marie.d", location: "Paris", points: 120, createdAt: "2025-01-15" },
-      { id: 2, firstname: "Jean", lastname: "Martin", username: "jean.m", location: "Lyon", points: 98, createdAt: "2025-03-02" },
-      { id: 3, firstname: "Sophie", lastname: "Bernard", username: "sophie.b", location: "Marseille", points: 85, createdAt: "2024-12-08" },
+      {
+        id: 1,
+        firstname: "Marie",
+        lastname: "Dubois",
+        username: "marie.d",
+        location: "Paris",
+        points: 120,
+        createdAt: "2025-01-15",
+      },
+      {
+        id: 2,
+        firstname: "Jean",
+        lastname: "Martin",
+        username: "jean.m",
+        location: "Lyon",
+        points: 98,
+        createdAt: "2025-03-02",
+      },
+      {
+        id: 3,
+        firstname: "Sophie",
+        lastname: "Bernard",
+        username: "sophie.b",
+        location: "Marseille",
+        points: 85,
+        createdAt: "2024-12-08",
+      }
     );
   }
 
@@ -281,7 +314,9 @@ const deleteVolunteer = async (id) => {
   }
 
   try {
-    const response = await fetchWithAuth(`/volunteers/${id}`, { method: "DELETE" });
+    const response = await fetchWithAuth(`/volunteers/${id}`, {
+      method: "DELETE",
+    });
 
     if (response.ok) {
       const idx = volunteers.findIndex((v) => v.id == id);
@@ -330,14 +365,30 @@ export const displayVolunteers = (list = volunteers) => {
     return;
   }
 
-  container.innerHTML = list.map((volunteer) => `
+  container.innerHTML = list
+    .map(
+      (volunteer) => `
     <div class="data-card">
-      <h3><i class="fas fa-user"></i> ${volunteer.firstname} ${volunteer.lastname}</h3>
-      <p><i class="fas fa-user-tag"></i> <strong>Username:</strong> ${volunteer.username}</p>
-      <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${volunteer.location || "Not specified"}</p>
-      <p><i class="fas fa-star"></i> <strong>Points:</strong> ${volunteer.points || 0}</p>
-      ${volunteer.createdAt ? `<p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> ${volunteer.createdAt}</p>` : ''}
-      ${actionVisible ? `
+      <h3><i class="fas fa-user"></i> ${volunteer.firstname} ${
+        volunteer.lastname
+      }</h3>
+      <p><i class="fas fa-user-tag"></i> <strong>Username:</strong> ${
+        volunteer.username
+      }</p>
+      <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${
+        volunteer.location || "Not specified"
+      }</p>
+      <p><i class="fas fa-star"></i> <strong>Points:</strong> ${
+        volunteer.points || 0
+      }</p>
+      ${
+        volunteer.createdAt
+          ? `<p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> ${volunteer.createdAt}</p>`
+          : ""
+      }
+      ${
+        actionVisible
+          ? `
         <div class="card-actions">
           <button class="btn btn-warning" onclick="openVolunteerEditModal(${volunteer.id})">
             <i class="fas fa-edit"></i> Edit
@@ -345,9 +396,13 @@ export const displayVolunteers = (list = volunteers) => {
           <button class="btn btn-danger" onclick="confirmDeleteVolunteer(${volunteer.id})">
             <i class="fas fa-trash"></i> Delete
           </button>
-        </div>` : ""}
+        </div>`
+          : ""
+      }
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 };
 
 /**
@@ -377,6 +432,10 @@ export const openVolunteerModal = () => {
   document.getElementById("volunteerModal").style.display = "block";
 };
 
+export const closeVolunteerModal = () => {
+  document.getElementById("volunteerModal").style.display = "none";
+};
+
 /**
  * Open modal to edit an existing volunteer.
  */
@@ -391,8 +450,10 @@ export const openVolunteerEditModal = (id) => {
   document.getElementById("volunteer-firstname").value = volunteer.firstname;
   document.getElementById("volunteer-lastname").value = volunteer.lastname;
   document.getElementById("volunteer-username").value = volunteer.username;
-  document.getElementById("volunteer-password").value = volunteer.password || "";
-  document.getElementById("volunteer-location").value = volunteer.location || "";
+  document.getElementById("volunteer-password").value =
+    volunteer.password || "";
+  document.getElementById("volunteer-location").value =
+    volunteer.location || "";
   document.getElementById("volunteer-points").value = volunteer.points || 0;
 
   document.getElementById("volunteerModal").style.display = "block";
@@ -403,68 +464,69 @@ export const openVolunteerEditModal = (id) => {
 ----------------------------- */
 
 // Live search
-const searchInputEl = document.getElementById('search-input');
+const searchInputEl = document.getElementById("search-input");
 if (searchInputEl) {
-  searchInputEl.addEventListener('input', () => {
-    const volSection = document.getElementById('volunteers-section');
-    if (!volSection || volSection.classList.contains('hidden')) return;
+  searchInputEl.addEventListener("input", () => {
+    const volSection = document.getElementById("volunteers-section");
+    if (!volSection || volSection.classList.contains("hidden")) return;
     applyVolunteerFilters();
   });
 }
 
 // Apply filters button
-const applyBtnEl = document.getElementById('apply-filters');
+const applyBtnEl = document.getElementById("apply-filters");
 if (applyBtnEl) {
-  applyBtnEl.addEventListener('click', () => {
-    const volSection = document.getElementById('volunteers-section');
-    if (!volSection || volSection.classList.contains('hidden')) return;
+  applyBtnEl.addEventListener("click", () => {
+    const volSection = document.getElementById("volunteers-section");
+    if (!volSection || volSection.classList.contains("hidden")) return;
     applyVolunteerFilters();
   });
 }
 
 // Toggle sort order
-const sortOrderBtn = document.getElementById('sort-order');
+const sortOrderBtn = document.getElementById("sort-order");
 if (sortOrderBtn) {
-  if (!sortOrderBtn.dataset.order) sortOrderBtn.dataset.order = 'desc';
-  sortOrderBtn.addEventListener('click', () => {
-    const volSection = document.getElementById('volunteers-section');
-    if (!volSection || volSection.classList.contains('hidden')) return;
-    const current = sortOrderBtn.dataset.order === 'asc' ? 'asc' : 'desc';
-    const next = current === 'asc' ? 'desc' : 'asc';
+  if (!sortOrderBtn.dataset.order) sortOrderBtn.dataset.order = "desc";
+  sortOrderBtn.addEventListener("click", () => {
+    const volSection = document.getElementById("volunteers-section");
+    if (!volSection || volSection.classList.contains("hidden")) return;
+    const current = sortOrderBtn.dataset.order === "asc" ? "asc" : "desc";
+    const next = current === "asc" ? "desc" : "asc";
     sortOrderBtn.dataset.order = next;
-    const icon = sortOrderBtn.querySelector('i');
+    const icon = sortOrderBtn.querySelector("i");
     if (icon) {
-      icon.className = next === 'asc'
-        ? 'fas fa-arrow-up-wide-short'
-        : 'fas fa-arrow-down-wide-short';
+      icon.className =
+        next === "asc"
+          ? "fas fa-arrow-up-wide-short"
+          : "fas fa-arrow-down-wide-short";
     }
     applyVolunteerFilters();
   });
 }
 
 // Clear/reset filters
-const clearBtnEl = document.getElementById('clear-filters');
+const clearBtnEl = document.getElementById("clear-filters");
 if (clearBtnEl) {
-  clearBtnEl.addEventListener('click', () => {
-    const volSection = document.getElementById('volunteers-section');
-    if (!volSection || volSection.classList.contains('hidden')) return;
+  clearBtnEl.addEventListener("click", () => {
+    const volSection = document.getElementById("volunteers-section");
+    if (!volSection || volSection.classList.contains("hidden")) return;
 
-    const si = document.getElementById('search-input');
-    const ls = document.getElementById('filter-location');
-    const df = document.getElementById('filter-date-from');
-    const dt = document.getElementById('filter-date-to');
-    const sb = document.getElementById('sort-by');
-    const so = document.getElementById('sort-order');
+    const si = document.getElementById("search-input");
+    const ls = document.getElementById("filter-location");
+    const df = document.getElementById("filter-date-from");
+    const dt = document.getElementById("filter-date-to");
+    const sb = document.getElementById("sort-by");
+    const so = document.getElementById("sort-order");
 
-    if (si) si.value = '';
-    if (ls) ls.value = '';
-    if (df) df.value = '';
-    if (dt) dt.value = '';
-    if (sb) sb.value = 'date';
+    if (si) si.value = "";
+    if (ls) ls.value = "";
+    if (df) df.value = "";
+    if (dt) dt.value = "";
+    if (sb) sb.value = "date";
     if (so) {
-      so.dataset.order = 'desc';
-      const icon = so.querySelector('i');
-      if (icon) icon.className = 'fas fa-arrow-down-wide-short';
+      so.dataset.order = "desc";
+      const icon = so.querySelector("i");
+      if (icon) icon.className = "fas fa-arrow-down-wide-short";
     }
 
     applyVolunteerFilters();
@@ -476,5 +538,5 @@ export {
   loadVolunteers,
   createVolunteer,
   updateVolunteer,
-  deleteVolunteer
+  deleteVolunteer,
 };

@@ -9,19 +9,20 @@ function parseDateInput(value) {
 }
 
 function populateCollectLocationFilter() {
-  const select = document.getElementById('filter-location');
+  const select = document.getElementById("filter-location");
   if (!select) return;
   const uniqueLocations = Array.from(
     new Set(
-      collects
-        .map(c => (c.location || c.place || '').trim())
-        .filter(Boolean)
+      collects.map((c) => (c.location || c.place || "").trim()).filter(Boolean)
     )
   ).sort((a, b) => a.localeCompare(b));
 
   const currentValue = select.value;
-  select.innerHTML = '<option value="">Tous les lieux</option>' +
-    uniqueLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+  select.innerHTML =
+    '<option value="">Tous les lieux</option>' +
+    uniqueLocations
+      .map((loc) => `<option value="${loc}">${loc}</option>`)
+      .join("");
 
   if (currentValue && uniqueLocations.includes(currentValue)) {
     select.value = currentValue;
@@ -29,31 +30,32 @@ function populateCollectLocationFilter() {
 }
 
 function sortCollects(list) {
-  const sortByEl = document.getElementById('sort-by');
-  const sortOrderEl = document.getElementById('sort-order');
-  const sortBy = sortByEl?.value || 'date';
-  const order = sortOrderEl?.dataset?.order === 'asc' ? 'asc' : 'desc';
-  const multiplier = order === 'asc' ? 1 : -1;
+  const sortByEl = document.getElementById("sort-by");
+  const sortOrderEl = document.getElementById("sort-order");
+  const sortBy = sortByEl?.value || "date";
+  const order = sortOrderEl?.dataset?.order === "asc" ? "asc" : "desc";
+  const multiplier = order === "asc" ? 1 : -1;
 
-  const compareStrings = (a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }) * multiplier;
+  const compareStrings = (a, b) =>
+    a.localeCompare(b, "fr", { sensitivity: "base" }) * multiplier;
   const compareNumbers = (a, b) => ((a || 0) - (b || 0)) * multiplier;
 
   return [...list].sort((a, b) => {
     switch (sortBy) {
-      case 'item': {
-        const av = (a.item || a.type || '').toString();
-        const bv = (b.item || b.type || '').toString();
+      case "item": {
+        const av = (a.item || a.type || "").toString();
+        const bv = (b.item || b.type || "").toString();
         return compareStrings(av, bv);
       }
-      case 'location': {
-        const av = (a.location || a.place || '').toString();
-        const bv = (b.location || b.place || '').toString();
+      case "location": {
+        const av = (a.location || a.place || "").toString();
+        const bv = (b.location || b.place || "").toString();
         return compareStrings(av, bv);
       }
-      case 'quantity': {
+      case "quantity": {
         return compareNumbers(Number(a.quantity || 0), Number(b.quantity || 0));
       }
-      case 'date':
+      case "date":
       default: {
         const ad = a.date ? new Date(a.date) : null;
         const bd = b.date ? new Date(b.date) : null;
@@ -67,25 +69,37 @@ function sortCollects(list) {
 }
 
 function applyCollectFilters() {
-  const searchInput = document.getElementById('search-input');
-  const locationSelect = document.getElementById('filter-location');
-  const dateFromInput = document.getElementById('filter-date-from');
-  const dateToInput = document.getElementById('filter-date-to');
+  const searchInput = document.getElementById("search-input");
+  const locationSelect = document.getElementById("filter-location");
+  const dateFromInput = document.getElementById("filter-date-from");
+  const dateToInput = document.getElementById("filter-date-to");
 
-  const query = (searchInput?.value || '').trim().toLowerCase();
-  const selectedLocation = (locationSelect?.value || '').trim().toLowerCase();
-  const dateFrom = parseDateInput(dateFromInput?.value || '');
-  const dateToRaw = parseDateInput(dateToInput?.value || '');
-  const dateTo = dateToRaw ? new Date(dateToRaw.getFullYear(), dateToRaw.getMonth(), dateToRaw.getDate(), 23, 59, 59, 999) : null;
+  const query = (searchInput?.value || "").trim().toLowerCase();
+  const selectedLocation = (locationSelect?.value || "").trim().toLowerCase();
+  const dateFrom = parseDateInput(dateFromInput?.value || "");
+  const dateToRaw = parseDateInput(dateToInput?.value || "");
+  const dateTo = dateToRaw
+    ? new Date(
+        dateToRaw.getFullYear(),
+        dateToRaw.getMonth(),
+        dateToRaw.getDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    : null;
 
   const filtered = collects.filter((c) => {
     if (query) {
-      const haystack = `${c.item || c.type || ''} ${c.location || c.place || ''}`.toLowerCase();
+      const haystack = `${c.item || c.type || ""} ${
+        c.location || c.place || ""
+      }`.toLowerCase();
       if (!haystack.includes(query)) return false;
     }
 
     if (selectedLocation) {
-      const loc = (c.location || c.place || '').toLowerCase();
+      const loc = (c.location || c.place || "").toLowerCase();
       if (loc !== selectedLocation) return false;
     }
 
@@ -230,7 +244,7 @@ const deleteCollect = async (id) => {
   }
 };
 
-export const displayCollects = (list = collects) => {
+const displayCollects = (list = collects) => {
   const container = document.getElementById("collects-list");
 
   if (list.length === 0) {
@@ -258,7 +272,9 @@ export const displayCollects = (list = collects) => {
                 </p>
                 <p>
                   <i class="fas fa-map-marker-alt"></i> 
-                  <strong>Lieu:</strong> ${collect.location || collect.place || "Non spécifié"}
+                  <strong>Lieu:</strong> ${
+                    collect.location || collect.place || "Non spécifié"
+                  }
                 </p>
                 <p>
                   <i class="fas fa-calendar"></i> 
@@ -270,10 +286,14 @@ export const displayCollects = (list = collects) => {
                 </p>
                   
                 <div class="card-actions">
-                <button class="btn btn-danger" onclick="openCollectEditModalLess(${collect.id})">
+                <button class="btn btn-danger" onclick="openCollectEditModalLess(${
+                  collect.id
+                })">
                 -
                 </button>
-                <button class="btn btn-success" onclick="openCollectEditModalMore(${collect.id})">
+                <button class="btn btn-success" onclick="openCollectEditModalMore(${
+                  collect.id
+                })">
                 +
                 </button>
                 </div>
@@ -289,6 +309,16 @@ export const showCollects = () => {
   document.getElementById("btn-volunteers").classList.remove("active");
   document.getElementById("btn-collects").classList.add("active");
   loadCollects();
+};
+
+export const openCollectModal = async () => {
+  const modal = document.getElementById("collectModal");
+  modal.style.display = "block";
+};
+
+export const closeCollectModal = async () => {
+  const modal = document.getElementById("collectModal");
+  modal.style.display = "none";
 };
 
 export const openCollectEditModalMore = async (id) => {
@@ -320,67 +350,76 @@ export const openCollectEditModalLess = async (id) => {
 };
 
 // Wire shared UI controls only when collects section is visible
-const searchEl = document.getElementById('search-input');
+const searchEl = document.getElementById("search-input");
 if (searchEl) {
-  searchEl.addEventListener('input', () => {
-    const colSection = document.getElementById('collects-section');
-    if (!colSection || colSection.classList.contains('hidden')) return;
+  searchEl.addEventListener("input", () => {
+    const colSection = document.getElementById("collects-section");
+    if (!colSection || colSection.classList.contains("hidden")) return;
     applyCollectFilters();
   });
 }
 
-const applyBtn = document.getElementById('apply-filters');
+const applyBtn = document.getElementById("apply-filters");
 if (applyBtn) {
-  applyBtn.addEventListener('click', () => {
-    const colSection = document.getElementById('collects-section');
-    if (!colSection || colSection.classList.contains('hidden')) return;
+  applyBtn.addEventListener("click", () => {
+    const colSection = document.getElementById("collects-section");
+    if (!colSection || colSection.classList.contains("hidden")) return;
     applyCollectFilters();
   });
 }
 
-const sortOrderBtn = document.getElementById('sort-order');
+const sortOrderBtn = document.getElementById("sort-order");
 if (sortOrderBtn) {
-  if (!sortOrderBtn.dataset.order) sortOrderBtn.dataset.order = 'desc';
-  sortOrderBtn.addEventListener('click', () => {
-    const colSection = document.getElementById('collects-section');
-    if (!colSection || colSection.classList.contains('hidden')) return;
-    const current = sortOrderBtn.dataset.order === 'asc' ? 'asc' : 'desc';
-    const next = current === 'asc' ? 'desc' : 'asc';
+  if (!sortOrderBtn.dataset.order) sortOrderBtn.dataset.order = "desc";
+  sortOrderBtn.addEventListener("click", () => {
+    const colSection = document.getElementById("collects-section");
+    if (!colSection || colSection.classList.contains("hidden")) return;
+    const current = sortOrderBtn.dataset.order === "asc" ? "asc" : "desc";
+    const next = current === "asc" ? "desc" : "asc";
     sortOrderBtn.dataset.order = next;
-    const icon = sortOrderBtn.querySelector('i');
+    const icon = sortOrderBtn.querySelector("i");
     if (icon) {
-      icon.className = next === 'asc' ? 'fas fa-arrow-up-wide-short' : 'fas fa-arrow-down-wide-short';
+      icon.className =
+        next === "asc"
+          ? "fas fa-arrow-up-wide-short"
+          : "fas fa-arrow-down-wide-short";
     }
     applyCollectFilters();
   });
 }
 
-const clearBtn = document.getElementById('clear-filters');
+const clearBtn = document.getElementById("clear-filters");
 if (clearBtn) {
-  clearBtn.addEventListener('click', () => {
-    const colSection = document.getElementById('collects-section');
-    if (!colSection || colSection.classList.contains('hidden')) return;
+  clearBtn.addEventListener("click", () => {
+    const colSection = document.getElementById("collects-section");
+    if (!colSection || colSection.classList.contains("hidden")) return;
 
-    const si = document.getElementById('search-input');
-    const ls = document.getElementById('filter-location');
-    const df = document.getElementById('filter-date-from');
-    const dt = document.getElementById('filter-date-to');
-    const sb = document.getElementById('sort-by');
-    const so = document.getElementById('sort-order');
+    const si = document.getElementById("search-input");
+    const ls = document.getElementById("filter-location");
+    const df = document.getElementById("filter-date-from");
+    const dt = document.getElementById("filter-date-to");
+    const sb = document.getElementById("sort-by");
+    const so = document.getElementById("sort-order");
 
-    if (si) si.value = '';
-    if (ls) ls.value = '';
-    if (df) df.value = '';
-    if (dt) dt.value = '';
-    if (sb) sb.value = 'date';
+    if (si) si.value = "";
+    if (ls) ls.value = "";
+    if (df) df.value = "";
+    if (dt) dt.value = "";
+    if (sb) sb.value = "date";
     if (so) {
-      so.dataset.order = 'desc';
-      const icon = so.querySelector('i');
-      if (icon) icon.className = 'fas fa-arrow-down-wide-short';
+      so.dataset.order = "desc";
+      const icon = so.querySelector("i");
+      if (icon) icon.className = "fas fa-arrow-down-wide-short";
     }
 
     applyCollectFilters();
   });
 }
 
-export { loadCollects, createCollect, updateCollect, deleteCollect };
+export {
+  loadCollects,
+  createCollect,
+  updateCollect,
+  deleteCollect,
+  displayCollects,
+};

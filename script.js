@@ -1,7 +1,18 @@
-import { handleLogin, handleLogout, showMainContent } from './js/connection.js';
-import { showVolunteers, openVolunteerModal, openVolunteerEditModal } from './js/volunteers.js';
-import { showCollects, openCollectEditModalLess, openCollectEditModalMore } from './js/collects.js';
-import { showLoading, showAlert } from './js/ui.js';
+import { handleLogin, handleLogout, showMainContent } from "./js/connection.js";
+import {
+  showVolunteers,
+  openVolunteerModal,
+  openVolunteerEditModal,
+  closeVolunteerModal,
+} from "./js/volunteers.js";
+import {
+  showCollects,
+  openCollectEditModalLess,
+  openCollectEditModalMore,
+  openCollectModal,
+  closeCollectModal,
+} from "./js/collects.js";
+import { showLoading, showAlert } from "./js/ui.js";
 
 // Expose only handlers used by inline HTML attributes
 window.handleLogin = handleLogin;
@@ -10,9 +21,12 @@ window.showMainContent = showMainContent;
 
 window.showVolunteers = showVolunteers;
 window.openVolunteerModal = openVolunteerModal;
+window.closeVolunteerModal = closeVolunteerModal;
 window.openVolunteerEditModal = openVolunteerEditModal;
 
 window.showCollects = showCollects;
+window.openCollectModal = openCollectModal;
+window.closeCollectModal = closeCollectModal;
 window.openCollectEditModalLess = openCollectEditModalLess;
 window.openCollectEditModalMore = openCollectEditModalMore;
 
